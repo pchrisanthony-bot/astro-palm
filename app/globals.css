@@ -2,26 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    overflow-x: hidden;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif text-ink;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Faint starfield wash behind every page — the mystical accent stays in the details. */
+.starfield {
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(124, 58, 237, 0.07), transparent 38%),
+    radial-gradient(circle at 88% 8%, rgba(217, 119, 6, 0.06), transparent 32%),
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(124, 58, 237, 0.35), transparent),
+    radial-gradient(1.5px 1.5px at 70% 12%, rgba(217, 119, 6, 0.35), transparent),
+    radial-gradient(1px 1px at 85% 60%, rgba(124, 58, 237, 0.3), transparent),
+    radial-gradient(1px 1px at 40% 80%, rgba(217, 119, 6, 0.3), transparent);
 }
