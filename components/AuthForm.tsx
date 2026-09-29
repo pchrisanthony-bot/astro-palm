@@ -43,6 +43,22 @@ function Field({
   );
 }
 
+/** Turns raw Supabase auth errors into guidance the user can act on. */
+function friendlyError(message: string, isSignup: boolean) {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials"))
+    return "Email or password is incorrect. New here? Tap “Begin free journey” below to create an account first.";
+  if (m.includes("email not confirmed"))
+    return "Please confirm your email first. Open the link we sent to your inbox, then sign in.";
+  if (m.includes("sending") || m.includes("not authorized") || m.includes("smtp"))
+    return "We couldn't send the confirmation email right now. Please try again shortly.";
+  if (m.includes("rate limit") || m.includes("too many"))
+    return "Too many attempts. Please wait a minute and try again.";
+  if (m.includes("already registered"))
+    return "An account with this email already exists. Please sign in instead.";
+  return isSignup ? `Sign-up failed: ${message}` : `Sign-in failed: ${message}`;
+}
+
 const inputCls =
   "min-h-[48px] w-full rounded-xl border border-transparent bg-mist pl-10 pr-12 text-[15px] text-ink placeholder:text-muted/60 transition focus:border-accent focus:bg-surface focus:outline-none focus:ring-4 focus:ring-accent/10";
 
@@ -72,7 +88,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         password,
         options: { emailRedirectTo: callback() },
       });
-      if (error) setError(error.message);
+      if (error) setError(friendlyError(error.message, true));
+      else if (data.user && data.user.identities?.length === 0)
+        setError(friendlyError("already registered", true));
       else if (data.session) {
         router.push("/upload");
         router.refresh();
@@ -80,7 +98,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       } else setNotice(`We've sent a confirmation link to ${email}. Open it to begin your journey.`);
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setError(error.message);
+      if (error) setError(friendlyError(error.message, false));
       else {
         router.push("/upload");
         router.refresh();
